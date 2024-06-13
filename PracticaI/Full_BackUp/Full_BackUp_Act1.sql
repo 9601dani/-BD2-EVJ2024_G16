@@ -48,7 +48,7 @@ DROP TABLE IF EXISTS `LOG_ACTIVIDAD`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `LOG_ACTIVIDAD` (
   `id_log_actividad` int NOT NULL AUTO_INCREMENT,
-  `timestampx` varchar(100) DEFAULT NULL,
+  `timestamp` varchar(100) DEFAULT NULL,
   `actividad` varchar(500) DEFAULT NULL,
   `idPaciente` int DEFAULT NULL,
   `idHabitacion` int DEFAULT NULL,
@@ -77,10 +77,10 @@ DROP TABLE IF EXISTS `LOG_HABITACION`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `LOG_HABITACION` (
-  `timestampx` varchar(100) NOT NULL,
+  `timestamp` varchar(100) NOT NULL,
   `statusx` varchar(45) DEFAULT NULL,
   `idHabitacion` int DEFAULT NULL,
-  PRIMARY KEY (`timestampx`),
+  PRIMARY KEY (`timestamp`),
   KEY `idHabitacion` (`idHabitacion`),
   CONSTRAINT `LOG_HABITACION_ibfk_1` FOREIGN KEY (`idHabitacion`) REFERENCES `HABITACION` (`idHabitacion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

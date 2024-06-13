@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `LOG_ACTIVIDAD`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `LOG_ACTIVIDAD` (
   `id_log_actividad` int NOT NULL AUTO_INCREMENT,
-  `timestampx` varchar(100) DEFAULT NULL,
+  `timestamp` varchar(100) DEFAULT NULL,
   `actividad` varchar(500) DEFAULT NULL,
   `idPaciente` int DEFAULT NULL,
   `idHabitacion` int DEFAULT NULL,
