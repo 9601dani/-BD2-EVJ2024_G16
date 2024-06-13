@@ -78,7 +78,7 @@ DROP TABLE IF EXISTS `LOG_HABITACION`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `LOG_HABITACION` (
   `timestamp` varchar(100) NOT NULL,
-  `statusx` varchar(45) DEFAULT NULL,
+  `status` varchar(45) DEFAULT NULL,
   `idHabitacion` int DEFAULT NULL,
   PRIMARY KEY (`timestamp`),
   KEY `idHabitacion` (`idHabitacion`),
