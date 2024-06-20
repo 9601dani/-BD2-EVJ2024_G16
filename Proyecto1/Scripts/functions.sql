@@ -14,13 +14,19 @@ RETURN
         U.[Firstname],
         U.[Lastname],
         U.[Email],
-        U.[DateOfBirth]
+        U.[DateOfBirth],
+        CA.[CourseCodCourse],
+        C.[Name]
     FROM
         [proyecto1].[CourseAssignment] AS CA
     INNER JOIN
         [proyecto1].[Usuarios] AS U
     ON
         CA.[StudentId] = U.[Id]
+    INNER JOIN
+        [proyecto1].[Course] AS C
+    ON
+        CA.[CourseCodCourse] = C.[CodCourse]
     WHERE
         CA.[CourseCodCourse] = @CodCourse
 )
@@ -40,21 +46,21 @@ RETURN
         C.[CodCourse],
         C.[Name],
         C.[CreditsRequired]
+
     FROM
-        [proyecto1].[CourseAssignment] AS CA
+        [proyecto1].[CourseTutor] AS CT
     INNER JOIN
         [proyecto1].[Course] AS C
     ON
-        CA.[CourseCodCourse] = C.[CodCourse]
+        CT.[CourseCodCourse] = C.[CodCourse]
     WHERE
-        CA.[StudentId] = @Id
+        CT.[TutorId] = @Id
 )
 go
 
 -- =============================================
--- Func_course_usuarios -> F3 (Id [Usuarios])
+-- Func_notificaciones -> F3 (Id [Usuarios])
 -- =============================================
-
 CREATE FUNCTION F3 (@Id UNIQUEIDENTIFIER)
 RETURNS TABLE
 AS
@@ -69,6 +75,8 @@ RETURN
         [proyecto1].[Notification] AS N
     WHERE
         N.[UserId] = @Id
+    ORDER BY
+        N.[Date] DESC
 )
 go
 
@@ -87,14 +95,13 @@ RETURN
         L.[Description]
     FROM
         [proyecto1].[HistoryLog] AS L
+    ORDER BY
+        L.[Date] DESC
 )
 go
 
 -- =============================================
 -- Func_usuarios -> F5 (Id [Usuarios])
-/*
-REVISAR
-*/
 -- =============================================
 CREATE FUNCTION F5 (@Id UNIQUEIDENTIFIER)
 RETURNS TABLE
@@ -107,23 +114,23 @@ RETURN
         U.[Lastname],
         U.[Email],
         U.[DateOfBirth],
+        PS.[Credits],
         R.[RoleName]
     FROM
         [proyecto1].[Usuarios] AS U
     INNER JOIN
-        [proyecto1].[Roles] AS R
+        proyecto1.ProfileStudent PS
     ON
-        U.[Id] = R.[Id]
+        U.Id = PS.UserId
     INNER JOIN
-        proyecto1.CourseAssignment CA
+        proyecto1.UsuarioRole UR
     ON
-        U.Id = CA.StudentId
-    INNER JOIN
-        proyecto1.Course C
+        U.Id = UR.UserId
+    INNER JOIN proyecto1.Roles R
     ON
-        C.CodCourse = CA.CourseCodCourse
+        UR.RoleId = R.Id
     WHERE
-        U.[Id] = @Id
+        U.[Id] = @Id AND UR.[IsLatestVersion]= 1
 )
 
 
