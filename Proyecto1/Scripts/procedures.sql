@@ -60,6 +60,7 @@ BEGIN
     );
 END
 
+GO
 -- ==================================================
 -- Procedure `Creacion de Cursos para estudiante` PR5(CodCourse, Name, CredistsRequired)
 -- ==================================================
@@ -114,6 +115,7 @@ AS BEGIN
 	END CATCH;
 END;
 
+GO
 
 -- ==================================================
 -- Procedure `Registro de usuarios` PR1(Firstname, Lastname, Email, DateOfBirth, Password, Credits)
@@ -294,6 +296,8 @@ BEGIN
     END CATCH;
 END;
 
+GO
+
 -- ==================================================
 -- Procedure `Validacion de Datos' PR6
 -- ==================================================
@@ -327,24 +331,10 @@ BEGIN
         END;
 END;
 
+GO
 
 -- ==================================================
 -- Procedure `Cambio de Roles' PR2(Email, CodCourse)
--- Algunos estudiantes pueden tomar el rol de tutor ya que la Universidad les da la oportunidad
--- de realizar prácticas finales como auxiliar de cátedra. Por lo tanto, se necesita un proceso
--- mediante el cual el estudiante se le agregue junto a su rol de estudiante un rol de tutor y así
--- mismo se le asigne un perfil de tutor con el cual podrá hacer acciones dentro del sistema.
--- Cuando este proceso se lleve a cabo se debe especificar a qué curso se le asigna como
--- tutor. Por último, se le enviará un correo de notificación al usuario que fue promovido con el
--- rol de tutor.
--- Entidades Implicadas:
--- ❖ UsuarioRole
--- ❖ TutorProfile
--- ❖ CourseTutor
--- ❖ Notification
--- Restricciones:
--- Se debe garantizar que el usuario sea un usuario con cuenta activa (se comprueba por
--- medio del campo EmailConfirmed).
 -- ==================================================
 CREATE PROCEDURE proyecto1.PR2
     @Email NVARCHAR(MAX),
@@ -441,13 +431,11 @@ BEGIN
     END
 
     -- REVISAR
-    /*-- Validar que el usuario no tenga el rol de tutor
-    IF EXISTS (SELECT * FROM proyecto1.Usuarios u
-               JOIN proyecto1.UsuarioRole ur ON u.Id = ur.UserId
-               JOIN proyecto1.Roles r ON ur.RoleId = r.Id
-               WHERE u.Email = @Email AND r.RoleName = 'Tutor')
+/*    -- Validar que el usuario no tenga el rol de tutor ya asignado
+    IF (SELECT * FROM proyecto1.UsuarioRole INNER JOIN proyecto1.Roles R2 on R2.Id = UsuarioRole.RoleId
+                 WHERE IsLatestVersion = 1 AND UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email) AND R2.RoleName = 'Tutor') IS NOT NULL
     BEGIN
-        SET @ErrorMessage = 'Error, El usuario ya tiene el rol de tutor';
+        SET @ErrorMessage = 'Error, El usuario ya tiene el rol de tutor asignado';
         SET @ErrorSeverity = 16;
         RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
         RETURN;
@@ -474,7 +462,8 @@ BEGIN
 
     -- Validar que el usuario tenga el rol de estudiante
     IF (SELECT * FROM proyecto1.UsuarioRole INNER JOIN proyecto1.Roles R2 on R2.Id = UsuarioRole.RoleId
-                 WHERE IsLatestVersion = 1 AND UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email) AND R2.RoleName = 'Student') IS NULL
+                 WHERE IsLatestVersion = 1 AND UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email)
+                 AND R2.RoleName = 'Student') IS NULL
     BEGIN
         SET @ErrorMessage = 'Error, El usuario no tiene actualmente el rol de estudiante';
         SET @ErrorSeverity = 16;
@@ -522,7 +511,162 @@ BEGIN
         SET @ErrorMessage = ERROR_MESSAGE();
         INSERT INTO proyecto1.HistoryLog (Date, Description)
         VALUES (GETDATE(), 'Error asignacion de Tutor - ' + @ErrorMessage);
-        PRINT 'Asignacion de tutor instatisfactoria';
+        PRINT 'Asignacion de tutor Erronea';
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH;
 END;
+
+GO
+-- ==================================================
+-- Procedure `Asignacion de Cursos` PR3(Email, CodCourse)
+-- ==================================================
+CREATE PROCEDURE proyecto1.PR3
+    @Email NVARCHAR(MAX),
+    @CodCourse INT
+AS
+BEGIN
+    DECLARE @UserId UNIQUEIDENTIFIER;
+    DECLARE @RoleId UNIQUEIDENTIFIER;
+    DECLARE @IsValid BIT;
+    DECLARE @ErrorMessage NVARCHAR(250);
+    DECLARE @ErrorSeverity INT;
+
+    -- Validar que el correo no sea nulo
+    IF @Email IS NULL
+    BEGIN
+        SET @ErrorMessage = 'Error, El correo no puede ir vacio';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el correo no sea vacio
+    IF LTRIM(RTRIM(@Email)) = ''
+    BEGIN
+        SET @ErrorMessage = 'Error, El correo no puede ir vacio';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el correo sea valido
+    IF @Email NOT LIKE '%_@__%.__%'
+    BEGIN
+        SET @ErrorMessage = 'Error, El correo no es valido';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el codigo del curso no sea nulo
+    IF @CodCourse IS NULL
+    BEGIN
+        SET @ErrorMessage = 'Error, El codigo del curso no puede ir vacio';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el codigo del curso no sea vacio
+    IF LTRIM(RTRIM(@CodCourse)) = ''
+    BEGIN
+        SET @ErrorMessage = 'Error, El codigo del curso no puede ir vacio';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el codigo del curso sea un numero
+    IF ISNUMERIC(@CodCourse) = 0
+    BEGIN
+        SET @ErrorMessage = 'Error, El codigo del curso debe ser un numero';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el codigo del curso sea un numero positivo
+    IF @CodCourse < 0
+    BEGIN
+        SET @ErrorMessage = ' Error, El codigo del curso debe ser un numero positivo';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el usuario exista
+    IF NOT EXISTS (SELECT * FROM proyecto1.Usuarios WHERE Email = @Email)
+    BEGIN
+        SET @ErrorMessage = 'Error, El usuario no existe';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el usuario tenga cuenta activa
+    IF NOT EXISTS (SELECT * FROM proyecto1.Usuarios WHERE Email = @Email AND EmailConfirmed = 1)
+    BEGIN
+        SET @ErrorMessage = 'Error, El usuario no tiene cuenta activa';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el curso exista
+
+    IF NOT EXISTS (SELECT * FROM proyecto1.Course WHERE CodCourse = @CodCourse)
+    BEGIN
+        SET @ErrorMessage = 'Error, El curso no existe';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que el usuario tenga el rol de estudiante
+    IF (SELECT * FROM proyecto1.UsuarioRole INNER JOIN proyecto1.Roles R2 on R2.Id = UsuarioRole.RoleId
+                 WHERE IsLatestVersion = 1 AND UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email) AND (R2.RoleName = 'Student' OR R2.RoleName = 'Tutor' )) IS NULL
+
+    BEGIN
+        SET @ErrorMessage = 'Error, El usuario no tiene actualmente un rol de estudiante asignado';
+        SET @ErrorSeverity = 16;
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Insertar en la tabla CourseAssignment
+        SET @UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email);
+        INSERT INTO proyecto1.CourseAssignment (StudentId, CourseCodCourse)
+        VALUES (@UserId, @CodCourse);
+
+        -- Insertar en la tabla Notification
+        INSERT INTO proyecto1.Notification (UserId, Message, Date)
+        VALUES (@UserId, 'Se le ha asignado el curso ' + CAST(@CodCourse AS NVARCHAR), GETDATE());
+
+        PRINT 'El usuario se le ha asignado el curso satisfactoriamente';
+
+        -- Insertar en la tabla notificacion para el auxiliar del
+
+        DECLARE @StudentFullName NVARCHAR(MAX);
+        SET @StudentFullName = (SELECT Firstname + ' ' + Lastname FROM proyecto1.Usuarios WHERE Id = @UserId);
+        INSERT INTO proyecto1.Notification (UserId, Message, Date)
+        VALUES ((SELECT TutorId FROM proyecto1.CourseTutor WHERE CourseCodCourse = @CodCourse),
+                'Se le ha asignado un nuevo estudiante con codigo: '+ CAST(@UserId AS NVARCHAR)+ ' y nombre: '+
+                @StudentFullName, GETDATE());
+
+        PRINT 'El auxiliar del curso ha sido notificado satisfactoriamente';
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        SET @ErrorMessage = ERROR_MESSAGE();
+        INSERT INTO proyecto1.HistoryLog (Date, Description)
+        VALUES (GETDATE(), 'Error en la asignacion de Curso - ' + @ErrorMessage);
+        PRINT 'Asignacion de curso Erronea';
+        RAISERROR(@ErrorMessage, 16, 1);
+    END CATCH;
+END;
+
+GO
