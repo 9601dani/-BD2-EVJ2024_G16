@@ -85,4 +85,29 @@ EXEC proyecto1.PR3
     @Email = 'jonh.doe@example.com',
     @CodCourse = 1
 GO
+SELECT * FROM proyecto1.HistoryLog
+SELECT * FROM proyecto1.CourseAssignment
+SELECT * FROM proyecto1.Course
+
+-- =============================================
+-- TEST 6: Asignacion de Curso Estudiante
+-- Prueba de asignarse a curso que no tiene creditos
+-- =============================================
+EXEC proyecto1.PR3
+    @Email = 'jonh.doe@example.com',
+    @CodCourse = 775
+GO
+SELECT * FROM proyecto1.HistoryLog
+
+-- =============================================
+-- TEST 7: Asignacion de Curso Estudiante
+-- Prueba de asignarse a curso que no existe
+-- =============================================
+EXEC proyecto1.PR3
+     @Email = 'jonh.doe@example.com',
+     @CodCourse = 7756
+GO
+
+
+
 

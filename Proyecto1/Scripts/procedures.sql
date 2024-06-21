@@ -762,6 +762,27 @@ BEGIN
         RETURN;
     END
 
+    -- Validar que el usuario no tenga el curso ya asignado
+    IF EXISTS (SELECT StudentId FROM proyecto1.CourseAssignment WHERE StudentId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email) AND CourseCodCourse = @CodCourse)
+    BEGIN
+        SET @ErrorMessage = 'Error, El usuario ya tiene el curso asignado. PR3';
+        SET @ErrorSeverity = 16;
+        INSERT INTO proyecto1.HistoryLog ([Date], Description)
+    		VALUES (GETDATE(), @ErrorMessage);
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
+
+    -- Validar que tenga los creditos necesarios para el curso
+    IF (SELECT Credits FROM proyecto1.ProfileStudent WHERE UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email)) < (SELECT CreditsRequired FROM proyecto1.Course WHERE CodCourse = @CodCourse)
+    BEGIN
+        SET @ErrorMessage = 'Error, El usuario no tiene los creditos necesarios para el curso. PR3';
+        SET @ErrorSeverity = 16;
+        INSERT INTO proyecto1.HistoryLog ([Date], Description)
+    		VALUES (GETDATE(), @ErrorMessage);
+        RAISERROR(@ErrorMessage, @ErrorSeverity, 1);
+        RETURN;
+    END
     -- Validar que el usuario tenga el rol de estudiante
     IF (SELECT UsuarioRole.Id FROM proyecto1.UsuarioRole INNER JOIN proyecto1.Roles R2 on R2.Id = UsuarioRole.RoleId
                  WHERE IsLatestVersion = 1 AND UserId = (SELECT Id FROM proyecto1.Usuarios WHERE Email = @Email)
@@ -794,10 +815,13 @@ BEGIN
 
         DECLARE @StudentFullName NVARCHAR(MAX);
         SET @StudentFullName = (SELECT Firstname + ' ' + Lastname FROM proyecto1.Usuarios WHERE Id = @UserId);
-        INSERT INTO proyecto1.Notification (UserId, Message, Date)
-        VALUES ((SELECT TutorId FROM proyecto1.CourseTutor WHERE CourseCodCourse = @CodCourse),
-                'Se le ha asignado un nuevo estudiante con codigo: '+ CAST(@UserId AS NVARCHAR)+ ' y nombre: '+
-                @StudentFullName, GETDATE());
+        IF EXISTS((SELECT TutorId FROM proyecto1.CourseTutor WHERE CourseCodCourse = @CodCourse))
+        BEGIN
+            INSERT INTO proyecto1.Notification (UserId, Message, Date)
+            VALUES ((SELECT TutorId FROM proyecto1.CourseTutor WHERE CourseCodCourse = @CodCourse),
+                    'Se le ha asignado un nuevo estudiante con codigo: '+ CAST(@UserId AS NVARCHAR)+ ' y nombre: '+
+                    @StudentFullName, GETDATE());
+        END;
 
         INSERT INTO proyecto1.HistoryLog ([Date], Description)
     		VALUES (GETDATE(), 'Se ha registrado una asignación al usuario '+ @StudentFullName);
