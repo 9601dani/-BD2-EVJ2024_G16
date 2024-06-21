@@ -1,6 +1,13 @@
 use BD2;
 GO
 
+DROP PROCEDURE IF EXISTS proyecto1.PR1;
+DROP PROCEDURE IF EXISTS proyecto1.PR2;
+DROP PROCEDURE IF EXISTS proyecto1.PR3;
+DROP PROCEDURE IF EXISTS proyecto1.PR4;
+DROP PROCEDURE IF EXISTS proyecto1.PR5;
+DROP PROCEDURE IF EXISTS proyecto1.PR6;
+
 -- =============================================
 -- Procedure `Creacion de roles para estudiante` PR4 (RoleName)
 -- =============================================
@@ -601,11 +608,7 @@ BEGIN
 
 
         -- si existe el perfil de tutor del usuario anteriormente obtenemos su código, sino lo creamos.
-        IF EXISTS(SELECT Id FROM proyecto1.TutorProfile WHERE UserId = @UserId)
-            BEGIN
-                SET @TutorCode = (SELECT TutorCode FROM proyecto1.TutorProfile WHERE UserId = @UserId);
-            END;
-        ELSE
+        IF NOT EXISTS(SELECT Id FROM proyecto1.TutorProfile WHERE UserId = @UserId)
             BEGIN
                 SET @TutorCode = NEWID();
                 -- Insertar en la tabla TutorProfile
@@ -615,7 +618,7 @@ BEGIN
 
         -- Insertar en la tabla CourseTutor
         INSERT INTO proyecto1.CourseTutor (TutorId, CourseCodCourse)
-        VALUES (@TutorCode, @CodCourse);
+        VALUES (@UserId, @CodCourse);
 
         -- Insertar en la tabla Notification
         INSERT INTO proyecto1.Notification (UserId, Message, Date)
