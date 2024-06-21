@@ -148,11 +148,11 @@ AS BEGIN
 		SELECT 'Inserción de Curso exitosa' AS Mensaje;
 
 		INSERT INTO proyecto1.HistoryLog(Date, Description)
-		    VALUES(GETDATE(), 'Se registró el curso: ' + @Name + ' con código: ' + @CodCourse);
+		    VALUES(GETDATE(), 'Se registró el curso: ' + CAST(@Name AS NVARCHAR) + ' con código: ' + CAST(@CodCourse AS NVARCHAR));
 		COMMIT TRANSACTION;
 	END TRY
 	BEGIN CATCH
-		SET @Description = 'Inserción de Curso Fallida '+ ERROR_MESSAGE()+'. PR5';
+		SET @Description = 'Inserción de Curso Fallida. PR5';
 		SELECT @Description AS 'Error';
 		ROLLBACK TRANSACTION;
 		INSERT INTO proyecto1.HistoryLog(Date, Description)
@@ -239,7 +239,7 @@ BEGIN
     --Correo valido
     IF (@Email NOT LIKE '%_@__%.__%')
     BEGIN
-        SET @ErrorMessage = 'Error, El correo no es valido. PR1';
+        SET @ErrorMessage = 'Error, El correo no es valido, no tiene formato correcto. PR1';
         SET @ErrorSeverity = 16;
         INSERT INTO proyecto1.HistoryLog ([Date], Description)
     		VALUES (GETDATE(), @ErrorMessage);
@@ -250,7 +250,7 @@ BEGIN
     -- Validación de email repetido.
     IF (SELECT Email FROM proyecto1.Usuarios WHERE Usuarios.Email = @Email) IS NOT NULL
         BEGIN
-            SET @ErrorMessage = 'Error, El correo ya se encuentra asociado a otro usuario. PR1';
+            SET @ErrorMessage = 'Error, El correo: '+ CAST (@Email AS NVARCHAR)+' ya se encuentra asociado a otro usuario. PR1';
             SET @ErrorSeverity = 16;
             INSERT INTO proyecto1.HistoryLog ([Date], Description)
                 VALUES (GETDATE(), @ErrorMessage);
