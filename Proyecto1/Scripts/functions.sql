@@ -4,7 +4,7 @@ go
 -- =============================================
 -- Func_course_usuarios -> F1 (CodCourse)
 -- =============================================
-CREATE FUNCTION F1 (@CodCourse INT)
+CREATE FUNCTION proyecto1.F1 (@CodCourse INT)
 RETURNS TABLE
 AS
 RETURN
@@ -36,7 +36,7 @@ go
 -- Func_course_usuarios -> F2 (Id [TutorProfile]
 -- =============================================
 
-CREATE FUNCTION F2 (@Id UNIQUEIDENTIFIER)
+CREATE FUNCTION proyecto1.F2 (@Id UNIQUEIDENTIFIER)
 RETURNS TABLE
 AS
 RETURN
@@ -61,7 +61,7 @@ go
 -- =============================================
 -- Func_notificaciones -> F3 (Id [Usuarios])
 -- =============================================
-CREATE FUNCTION F3 (@Id UNIQUEIDENTIFIER)
+CREATE FUNCTION proyecto1.F3 (@Id UNIQUEIDENTIFIER)
 RETURNS TABLE
 AS
 RETURN
@@ -75,15 +75,13 @@ RETURN
         [proyecto1].[Notification] AS N
     WHERE
         N.[UserId] = @Id
-    ORDER BY
-        N.[Date] DESC
 )
 go
 
 -- =============================================
 -- Func_logger -> F4 ()
 -- =============================================
-CREATE FUNCTION F4 ()
+CREATE FUNCTION proyecto1.F4 ()
 RETURNS TABLE
 AS
 RETURN
@@ -95,15 +93,13 @@ RETURN
         L.[Description]
     FROM
         [proyecto1].[HistoryLog] AS L
-    ORDER BY
-        L.[Date] DESC
 )
 go
 
 -- =============================================
 -- Func_usuarios -> F5 (Id [Usuarios])
 -- =============================================
-CREATE FUNCTION F5 (@Id UNIQUEIDENTIFIER)
+CREATE FUNCTION proyecto1.F5 (@Id UNIQUEIDENTIFIER)
 RETURNS TABLE
 AS
 RETURN
