@@ -369,6 +369,8 @@ BEGIN
         VALUES (@UserId, 'Se ha registrado satisfactoriamente al usuario: ' + @Firstname, GETDATE());
 		PRINT 'El estudiante ha sido registrado satisfactoriamente';
 
+
+
         INSERT INTO proyecto1.HistoryLog (Date, Description)
         VALUES (GETDATE(), 'Se ha registrado satisfactoriamente al usuario: ' + @Firstname);
 
