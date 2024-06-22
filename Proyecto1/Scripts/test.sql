@@ -115,9 +115,9 @@ GO
 -- "EXITOSO"
 -- =============================================
 EXEC proyecto1.PR5
-    @CodCourse = 1,
+    @CodCourse = 333,
     @Name = 'ETICA PROFESIONAL',
-    @CreditsRequired = 3
+    @CreditsRequired = 200
 GO
 SELECT * FROM proyecto1.HistoryLog
 SELECT * FROM proyecto1.Course
@@ -188,6 +188,18 @@ EXEC proyecto1.PR2
 GO
 
 -- =============================================
+-- TEST 9: Creación de roles PR4
+-- =============================================
+EXEC proyecto1.PR4 'Admin';
+
+SELECT * FROM proyecto1.Roles;
+SELECT * FROM proyecto1.HistoryLog;
+
+-- =============================================
+-- TEST 10: Creación de roles PR4
+-- =============================================
+
+-- =============================================
 -- Test functions
 -- =============================================
 USE BD2
@@ -225,3 +237,20 @@ SELECT * FROM proyecto1.F5('0DA0E3D7-CF0F-4234-9EBC-D4ECF50BE800');
 
 SELECT * FROM proyecto1.TutorProfile;
 
+-- =============================================
+-- Truncate a tablas del esquema proyecto1
+-- =============================================
+USE BD2
+GO
+TRUNCATE TABLE proyecto1.CourseAssignment
+TRUNCATE TABLE proyecto1.CourseTutor
+TRUNCATE TABLE proyecto1.HistoryLog
+TRUNCATE TABLE proyecto1.Notification
+TRUNCATE TABLE proyecto1.TFA
+TRUNCATE TABLE proyecto1.Roles
+TRUNCATE TABLE proyecto1.TutorProfile
+TRUNCATE TABLE proyecto1.UsuarioRole
+TRUNCATE TABLE proyecto1.ProfileStudent
+TRUNCATE TABLE proyecto1.Usuarios
+TRUNCATE TABLE proyecto1.Course
+GO

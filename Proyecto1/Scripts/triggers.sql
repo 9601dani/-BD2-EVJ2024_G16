@@ -1,5 +1,7 @@
-use BD2;
+use BD2
 GO
+
+use BD2;
 
 -- ======================
 -- Trigger 1 para Course

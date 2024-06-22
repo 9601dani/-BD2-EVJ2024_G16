@@ -824,7 +824,7 @@ BEGIN
         BEGIN
             INSERT INTO proyecto1.Notification (UserId, Message, Date)
             VALUES ((SELECT TutorId FROM proyecto1.CourseTutor WHERE CourseCodCourse = @CodCourse),
-                    'Se le ha asignado un nuevo estudiante con codigo: '+ CAST(@UserId AS NVARCHAR)+ ' y nombre: '+
+                    'Se le ha asignado un nuevo estudiante con codigo: '+ CAST(@UserId AS NVARCHAR(MAX))+ ' y nombre: '+
                     @StudentFullName, GETDATE());
         END;
 
@@ -838,7 +838,7 @@ BEGIN
         ROLLBACK;
         SET @ErrorMessage = ERROR_MESSAGE();
         INSERT INTO proyecto1.HistoryLog (Date, Description)
-        VALUES (GETDATE(), 'Error en la asignacion de Curso - ' + @ErrorMessage+'. PR3');
+        VALUES (GETDATE(), 'Error en la asignacion de Curso -. PR3');
         PRINT 'Asignacion de curso Erronea';
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH;
